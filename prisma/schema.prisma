@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  RESEARCHER
+  ADMIN
+}
+
+enum PaperStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum SectionType {
+  RESEARCH_QUESTION
+  METHODOLOGY
+  DATASET
+  KEY_FINDINGS
+  LIMITATION
+  FUTURE_WORK
+}
+
+model User {
+  id           String      @id @default(cuid())
+  name         String
+  email        String      @unique
+  passwordHash String      @map("password_hash")
+  role         Role        @default(RESEARCHER)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  workspaces   Workspace[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id          String          @id @default(cuid())
+  userId      String          @map("user_id")
+  name        String
+  description String?
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  papers      Paper[]
+  clusters    Cluster[]
+  gaps        GapSuggestion[]
+
+  @@map("workspaces")
+}
+
+model Paper {
+  id          String         @id @default(cuid())
+  workspaceId String         @map("workspace_id")
+  title       String
+  authors     String?
+  abstract    String?
+  year        Int?
+  journal     String?
+  doi         String?
+  pdfUrl      String?        @map("pdf_url")
+  status      PaperStatus    @default(PENDING)
+  rawText     String?        @map("raw_text")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sections    PaperSection[]
+  embeddings  Embedding[]
+  clusters    Cluster[]      @relation("ClusterPapers")
+
+  @@map("papers")
+}
+
+model PaperSection {
+  id          String      @id @default(cuid())
+  paperId     String      @map("paper_id")
+  sectionType SectionType @map("section_type")
+  content     String
+  createdAt   DateTime    @default(now()) @map("created_at")
+  paper       Paper       @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  embeddings  Embedding[]
+
+  @@map("paper_sections")
+}
+
+// Note: The embedding vector column is managed via raw SQL migration
+// Prisma does not natively support pgvector types
+model Embedding {
+  id        String        @id @default(cuid())
+  paperId   String        @map("paper_id")
+  sectionId String?       @map("section_id")
+  label     String?       // e.g. "abstract", "methodology", etc.
+  createdAt DateTime      @default(now()) @map("created_at")
+  paper     Paper         @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  section   PaperSection? @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  // embedding vector(1536) — added via raw SQL migration
+
+  @@map("embeddings")
+}
+
+model Cluster {
+  id          String          @id @default(cuid())
+  workspaceId String          @map("workspace_id")
+  clusterName String          @map("cluster_name")
+  description String?
+  color       String?         // hex color for visualization
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  papers      Paper[]         @relation("ClusterPapers")
+  gaps        GapSuggestion[]
+
+  @@map("clusters")
+}
+
+model GapSuggestion {
+  id                  String    @id @default(cuid())
+  workspaceId         String    @map("workspace_id")
+  clusterId           String?   @map("cluster_id")
+  gapTitle            String    @map("gap_title")
+  gapDescription      String    @map("gap_description")
+  suggestedMethodology String?  @map("suggested_methodology")
+  potentialImpact     String?   @map("potential_impact")
+  confidenceScore     Float     @default(0) @map("confidence_score")
+  relatedPaperIds     String[]  @map("related_paper_ids")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  workspace           Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  cluster             Cluster?  @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+
+  @@map("gap_suggestions")
+}
