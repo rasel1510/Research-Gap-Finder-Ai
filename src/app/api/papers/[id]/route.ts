@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -14,8 +14,10 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const paper = await prisma.paper.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         sections: true,
         clusters: true,
@@ -41,7 +43,7 @@ export async function GET(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -49,7 +51,9 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await prisma.paper.delete({ where: { id: params.id } });
+    const { id } = await params;
+
+    await prisma.paper.delete({ where: { id } });
     return NextResponse.json({ message: "Paper deleted" });
   } catch (error) {
     console.error("Paper delete error:", error);

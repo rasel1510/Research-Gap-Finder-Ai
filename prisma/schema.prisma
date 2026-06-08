@@ -97,11 +97,10 @@ model Embedding {
   paperId   String        @map("paper_id")
   sectionId String?       @map("section_id")
   label     String?       // e.g. "abstract", "methodology", etc.
+  embedding String?       @db.Text
   createdAt DateTime      @default(now()) @map("created_at")
   paper     Paper         @relation(fields: [paperId], references: [id], onDelete: Cascade)
   section   PaperSection? @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-
-  // embedding vector(1536) — added via raw SQL migration
 
   @@map("embeddings")
 }

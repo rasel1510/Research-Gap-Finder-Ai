@@ -1,7 +1,7 @@
 // PDF Parser Service
 // Extracts text content from uploaded PDF files
 
-import pdf from "pdf-parse";
+const pdf = require("pdf-parse");
 
 export interface ParsedPDF {
   text: string;

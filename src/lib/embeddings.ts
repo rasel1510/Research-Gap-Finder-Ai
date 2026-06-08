@@ -1,8 +1,22 @@
 // Embedding Generation & Vector Search Service
-// Generates embeddings via OpenRouter and stores/queries them in PostgreSQL with pgvector
+// Generates embeddings via OpenRouter and stores/queries them in PostgreSQL with in-memory fallback
 
 import prisma from "./prisma";
 import { generateEmbedding } from "./openrouter";
+
+function cosineSimilarity(a: number[], b: number[]): number {
+  if (a.length !== b.length) return 0;
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dotProduct += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+  if (normA === 0 || normB === 0) return 0;
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
 
 /**
  * Generate and store an embedding for a text chunk
@@ -22,28 +36,21 @@ export async function createAndStoreEmbedding(params: {
   // Generate embedding vector via OpenRouter
   const embedding = await generateEmbedding(text);
 
-  // Create the embedding record (without vector) to get the ID
+  // Create the embedding record with the vector stringified as JSON text
   const record = await prisma.embedding.create({
     data: {
       paperId,
       sectionId: sectionId || null,
       label,
+      embedding: JSON.stringify(embedding),
     },
   });
-
-  // Store the vector using raw SQL (Prisma doesn't support pgvector natively)
-  const vectorStr = `[${embedding.join(",")}]`;
-  await prisma.$executeRawUnsafe(
-    `UPDATE embeddings SET embedding = $1::vector WHERE id = $2`,
-    vectorStr,
-    record.id
-  );
 
   return record.id;
 }
 
 /**
- * Search for similar embeddings using cosine distance
+ * Search for similar embeddings using cosine distance (computed in-memory)
  */
 export async function searchSimilarEmbeddings(params: {
   queryText: string;
@@ -63,46 +70,45 @@ export async function searchSimilarEmbeddings(params: {
 
   // Generate embedding for the query
   const queryEmbedding = await generateEmbedding(queryText);
-  const vectorStr = `[${queryEmbedding.join(",")}]`;
 
-  // Build the query with optional workspace and label filters
-  let query = `
-    SELECT e.id, e.paper_id as "paperId", e.section_id as "sectionId", e.label,
-           e.embedding <=> $1::vector as distance
-    FROM embeddings e
-    JOIN papers p ON e.paper_id = p.id
-    WHERE e.embedding IS NOT NULL
-  `;
+  // Fetch candidate embeddings from DB
+  const candidates = await prisma.embedding.findMany({
+    where: {
+      embedding: { not: null },
+      paper: workspaceId ? { workspaceId } : undefined,
+      label: label || undefined,
+    },
+    select: {
+      id: true,
+      paperId: true,
+      sectionId: true,
+      label: true,
+      embedding: true,
+    },
+  });
 
-  const params_arr: unknown[] = [vectorStr];
-  let paramIdx = 2;
+  // Calculate distances in-memory
+  const scored = candidates
+    .map((c) => {
+      try {
+        const vector = JSON.parse(c.embedding!);
+        const similarity = cosineSimilarity(queryEmbedding, vector);
+        return {
+          id: c.id,
+          paperId: c.paperId,
+          sectionId: c.sectionId,
+          label: c.label,
+          distance: 1 - similarity, // Cosine distance
+        };
+      } catch (err) {
+        return null;
+      }
+    })
+    .filter((s): s is NonNullable<typeof s> => s !== null);
 
-  if (workspaceId) {
-    query += ` AND p.workspace_id = $${paramIdx}`;
-    params_arr.push(workspaceId);
-    paramIdx++;
-  }
-
-  if (label) {
-    query += ` AND e.label = $${paramIdx}`;
-    params_arr.push(label);
-    paramIdx++;
-  }
-
-  query += ` ORDER BY distance ASC LIMIT $${paramIdx}`;
-  params_arr.push(limit);
-
-  const results = await prisma.$queryRawUnsafe<
-    {
-      id: string;
-      paperId: string;
-      sectionId: string | null;
-      label: string | null;
-      distance: number;
-    }[]
-  >(query, ...params_arr);
-
-  return results;
+  // Sort and limit
+  scored.sort((a, b) => a.distance - b.distance);
+  return scored.slice(0, limit);
 }
 
 /**
@@ -119,36 +125,33 @@ export async function getWorkspaceEmbeddings(
     embedding: number[];
   }[]
 > {
-  let query = `
-    SELECT e.id, e.paper_id as "paperId",
-           e.embedding::text as "embeddingText"
-    FROM embeddings e
-    JOIN papers p ON e.paper_id = p.id
-    WHERE e.embedding IS NOT NULL
-    AND p.workspace_id = $1
-  `;
-
-  const params_arr: unknown[] = [workspaceId];
-
-  if (label) {
-    query += ` AND e.label = $2`;
-    params_arr.push(label);
-  }
-
-  const results = await prisma.$queryRawUnsafe<
-    {
-      id: string;
-      paperId: string;
-      embeddingText: string;
-    }[]
-  >(query, ...params_arr);
+  const results = await prisma.embedding.findMany({
+    where: {
+      embedding: { not: null },
+      paper: { workspaceId },
+      label: label || undefined,
+    },
+    select: {
+      id: true,
+      paperId: true,
+      embedding: true,
+    },
+  });
 
   // Parse embedding text back to number arrays
-  return results.map((r) => ({
-    id: r.id,
-    paperId: r.paperId,
-    embedding: JSON.parse(r.embeddingText),
-  }));
+  return results
+    .map((r) => {
+      try {
+        return {
+          id: r.id,
+          paperId: r.paperId,
+          embedding: JSON.parse(r.embedding!),
+        };
+      } catch (e) {
+        return null;
+      }
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
 }
 
 /**

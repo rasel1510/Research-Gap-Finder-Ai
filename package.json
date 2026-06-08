@@ -5,14 +5,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
-    "@prisma/client": "^7.8.0",
+    "@prisma/client": "^5.22.0",
     "@radix-ui/react-avatar": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.16",
     "@radix-ui/react-dropdown-menu": "^2.1.17",
@@ -50,6 +53,7 @@
     "@types/pdf-parse": "^1.1.5",
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.15",
-    "prisma": "^7.8.0"
+    "prisma": "^5.22.0",
+    "tailwindcss": "^3.4.17"
   }
 }
