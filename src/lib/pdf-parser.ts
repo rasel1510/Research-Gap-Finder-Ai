@@ -1,7 +1,4 @@
-// PDF Parser Service
-// Extracts text content from uploaded PDF files
-
-const pdf = require("pdf-parse");
+import { PDFParse } from "pdf-parse";
 
 export interface ParsedPDF {
   text: string;
@@ -19,16 +16,18 @@ export interface ParsedPDF {
  */
 export async function parsePDF(buffer: Buffer): Promise<ParsedPDF> {
   try {
-    const data = await pdf(buffer);
+    const parser = new PDFParse({ data: buffer });
+    const textResult = await parser.getText();
+    const infoResult = await parser.getInfo();
 
     return {
-      text: data.text,
-      numPages: data.numpages,
+      text: textResult.text,
+      numPages: textResult.total,
       info: {
-        title: data.info?.Title || undefined,
-        author: data.info?.Author || undefined,
-        subject: data.info?.Subject || undefined,
-        creator: data.info?.Creator || undefined,
+        title: infoResult.info?.Title || undefined,
+        author: infoResult.info?.Author || undefined,
+        subject: infoResult.info?.Subject || undefined,
+        creator: infoResult.info?.Creator || undefined,
       },
     };
   } catch (error) {
