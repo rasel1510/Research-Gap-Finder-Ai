@@ -136,3 +136,6 @@ model GapSuggestion {
 
   @@map("gap_suggestions")
 }
+
+
+

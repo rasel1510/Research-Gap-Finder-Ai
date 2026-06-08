@@ -4,7 +4,7 @@
 const OPENROUTER_BASE_URL =
   process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
-const LLM_MODEL = process.env.LLM_MODEL || "google/gemini-2.0-flash-001";
+const LLM_MODEL = process.env.LLM_MODEL || "google/gemini-2.5-flash";
 const EMBEDDING_MODEL =
   process.env.EMBEDDING_MODEL || "openai/text-embedding-3-small";
 
