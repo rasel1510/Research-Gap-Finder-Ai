@@ -106,7 +106,7 @@ export default function GapsPage() {
   return (
     <div className="space-y-8 animate-fade-in pb-16">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-900 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <h1 className="text-3xl font-extrabold text-white flex items-center gap-2">
             <Lightbulb className="h-8 w-8 text-emerald-400" /> Research Gap Intelligence
@@ -120,7 +120,7 @@ export default function GapsPage() {
           <Button
             onClick={handleDetectGaps}
             disabled={isDetecting || !workspaceId}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-2 shadow-lg hover:shadow-indigo-500/25"
+            className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white flex items-center gap-2 shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 hover:scale-[1.02] duration-200 transition-all"
           >
             {isDetecting ? (
               <>
@@ -129,7 +129,7 @@ export default function GapsPage() {
               </>
             ) : (
               <>
-                <Brain className="h-4.5 w-4.5" />
+                <Brain className="h-4.5 w-4.5 animate-bounce" />
                 Generate Gap Analysis
               </>
             )}
@@ -149,10 +149,10 @@ export default function GapsPage() {
           <span>Scanning thematic overlap for literature boundaries...</span>
         </div>
       ) : gaps.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 border border-dashed border-slate-800 rounded-2xl text-slate-500">
-          <Lightbulb className="h-12 w-12 text-slate-650 mb-4 animate-bounce" />
+        <div className="flex flex-col items-center justify-center py-16 border border-dashed border-slate-800 rounded-2xl text-slate-500 animate-pulse">
+          <Lightbulb className="h-12 w-12 text-slate-700 mb-4" />
           <p className="font-semibold text-white">No gap suggestions generated yet</p>
-          <p className="text-slate-650 text-sm mt-1 max-w-sm text-center">
+          <p className="text-slate-600 text-sm mt-1 max-w-sm text-center">
             Run cluster analysis on your literature repository first, then trigger Gap Discovery above.
           </p>
         </div>
@@ -165,7 +165,7 @@ export default function GapsPage() {
             return (
               <Card 
                 key={gap.id} 
-                className="bg-slate-950/60 border-slate-900 overflow-hidden hover:border-slate-800 transition-all stagger-item"
+                className="bg-slate-900/50 border-slate-800/80 overflow-hidden hover:border-slate-700/60 shadow-lg hover:shadow-xl hover:translate-y-[-1px] transition-all duration-300 stagger-item"
               >
                 <CardHeader className="cursor-pointer" onClick={() => toggleExpand(gap.id)}>
                   <div className="flex flex-wrap items-start justify-between gap-4">
@@ -196,13 +196,13 @@ export default function GapsPage() {
                           {percentage}% ({getConfidenceLabel(gap.confidenceScore)})
                         </span>
                       </div>
-                      <Progress value={percentage} className="h-1.5 bg-slate-900" />
+                      <Progress value={percentage} className="h-1.5 bg-slate-950" />
                     </div>
 
                   </div>
                 </CardHeader>
                 
-                <CardContent className="pt-0 pb-6 border-t border-slate-900/60 mt-3 pt-4">
+                <CardContent className="pt-0 pb-6 border-t border-slate-800/40 mt-3 pt-4">
                   {/* Summary preview */}
                   <p className="text-slate-300 text-sm leading-relaxed">{gap.gapDescription}</p>
 
@@ -222,12 +222,12 @@ export default function GapsPage() {
 
                   {/* Expandable methodology & potential impact proposals */}
                   {isExpanded && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 border-t border-slate-900 pt-6 animate-fade-in">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 border-t border-slate-800 pt-6 animate-fade-in">
                       <div className="space-y-2">
                         <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                           <Cpu className="h-4 w-4 text-indigo-400" /> Suggested Methodology
                         </h4>
-                        <p className="text-slate-300 text-xs md:text-sm leading-relaxed p-3 bg-slate-950/60 border border-slate-900 rounded-lg">
+                        <p className="text-slate-350 text-xs md:text-sm leading-relaxed p-3 bg-slate-950/80 border border-slate-800/60 rounded-lg">
                           {gap.suggestedMethodology || "Under review by modeling advisors."}
                         </p>
                       </div>
@@ -236,7 +236,7 @@ export default function GapsPage() {
                         <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                           <TrendingUp className="h-4 w-4 text-emerald-400" /> Potential Impact
                         </h4>
-                        <p className="text-slate-300 text-xs md:text-sm leading-relaxed p-3 bg-slate-950/60 border border-slate-900 rounded-lg">
+                        <p className="text-slate-350 text-xs md:text-sm leading-relaxed p-3 bg-slate-950/80 border border-slate-800/60 rounded-lg">
                           {gap.potentialImpact || "Review pending impact evaluation."}
                         </p>
                       </div>

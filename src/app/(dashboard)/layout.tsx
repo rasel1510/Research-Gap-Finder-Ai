@@ -151,20 +151,20 @@ export default function DashboardLayout({
   ];
 
   return (
-    <div className="flex-1 flex min-h-screen bg-slate-950/20 text-slate-100 z-10">
+    <div className="flex-1 flex min-h-screen bg-slate-950 dot-pattern text-slate-100 z-10">
       {/* Sidebar for Desktop */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-slate-950/80 border-r border-slate-900/80 backdrop-blur-xl transition-transform duration-300 flex flex-col justify-between p-4 lg:translate-x-0 lg:static lg:flex",
+        "fixed inset-y-0 left-0 z-40 w-64 bg-slate-950/90 border-r border-slate-900 backdrop-blur-xl transition-transform duration-300 flex flex-col justify-between p-4 lg:translate-x-0 lg:static lg:flex",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div>
           {/* Logo */}
           <div className="flex items-center justify-between mb-8 px-2">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="bg-indigo-600 p-1.5 rounded-lg">
+              <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-1.5 rounded-lg shadow-lg shadow-indigo-500/15">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
-              <span className="font-bold text-lg text-white">ResearchGap <span className="text-indigo-400">AI</span></span>
+              <span className="font-bold text-lg text-white">ResearchGap <span className="gradient-text">AI</span></span>
             </Link>
             <Button variant="ghost" size="icon" className="lg:hidden text-slate-400 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
               <X className="h-5 w-5" />
@@ -246,7 +246,7 @@ export default function DashboardLayout({
                 <div className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                   pathname === item.href
-                    ? "bg-primary text-primary-foreground font-semibold shadow-indigo-500/10 shadow-lg"
+                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold shadow-lg shadow-indigo-500/20"
                     : "text-slate-400 hover:text-white hover:bg-slate-900/50"
                 )}>
                   {item.icon}
@@ -284,10 +284,10 @@ export default function DashboardLayout({
         {/* Mobile Header */}
         <header className="flex items-center justify-between px-6 py-4 bg-slate-950/60 border-b border-slate-900/60 backdrop-blur-md lg:hidden">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="bg-indigo-600 p-1.5 rounded-lg">
+            <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-1.5 rounded-lg">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold text-base text-white">ResearchGap</span>
+            <span className="font-bold text-base text-white">ResearchGap <span className="gradient-text">AI</span></span>
           </Link>
           <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white" onClick={() => setIsSidebarOpen(true)}>
             <Menu className="h-6 w-6" />

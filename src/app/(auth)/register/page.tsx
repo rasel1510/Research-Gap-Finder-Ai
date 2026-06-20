@@ -56,12 +56,12 @@ export default function RegisterPage() {
   return (
     <div className="flex-1 flex items-center justify-center px-6 py-12 relative">
       {/* Background blur */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <Card className="w-full max-w-md bg-slate-950/80 border-slate-800/80 shadow-2xl backdrop-blur-md relative z-10">
+      <Card className="w-full max-w-md bg-slate-950/80 border-slate-800/80 shadow-2xl backdrop-blur-md relative z-10 hover:border-indigo-500/30 transition-all duration-300">
         <CardHeader className="space-y-2 text-center pb-2">
           <div className="flex justify-center mb-2">
-            <div className="bg-indigo-600 p-2.5 rounded-lg shadow-lg shadow-indigo-600/25">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-500 p-2.5 rounded-lg shadow-lg shadow-indigo-500/15">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
           </div>
@@ -122,7 +122,7 @@ export default function RegisterPage() {
           <CardFooter className="flex flex-col space-y-4">
             <Button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-all flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 hover:scale-[1.01] duration-200"
               disabled={isLoading}
             >
               {isLoading ? (

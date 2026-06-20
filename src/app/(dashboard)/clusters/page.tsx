@@ -118,7 +118,7 @@ export default function ClustersPage() {
   return (
     <div className="space-y-8 animate-fade-in pb-16">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-900 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <h1 className="text-3xl font-extrabold text-white flex items-center gap-2">
             <Layers className="h-8 w-8 text-indigo-400" /> Thematic Cluster Map
@@ -146,7 +146,7 @@ export default function ClustersPage() {
           <Button
             onClick={handleRunClustering}
             disabled={isClustering || !workspaceId}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-2 mt-5"
+            className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-650 text-white flex items-center gap-2 mt-5 shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 hover:scale-[1.02] duration-200 transition-all"
           >
             {isClustering ? (
               <>
@@ -175,10 +175,10 @@ export default function ClustersPage() {
           <span>Analyzing embedding partitions...</span>
         </div>
       ) : clusters.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 border border-dashed border-slate-800 rounded-2xl text-slate-500">
-          <Layers className="h-12 w-12 text-slate-600 mb-4 animate-pulse" />
+        <div className="flex flex-col items-center justify-center py-16 border border-dashed border-slate-800 rounded-2xl text-slate-500 animate-pulse">
+          <Layers className="h-12 w-12 text-slate-755 mb-4" />
           <p className="font-semibold text-white">No clusters generated yet</p>
-          <p className="text-slate-650 text-sm mt-1 max-w-sm text-center">
+          <p className="text-slate-600 text-sm mt-1 max-w-sm text-center">
             You need at least 2 papers uploaded with abstract embeddings. Click &apos;Run Analysis&apos; above.
           </p>
         </div>
@@ -187,13 +187,13 @@ export default function ClustersPage() {
           
           {/* SVG Force/Orbit style visual Map */}
           <div className="lg:col-span-2">
-            <Card className="bg-slate-950/60 border-slate-900 shadow-xl overflow-hidden h-[500px] flex flex-col justify-between">
+            <Card className="bg-slate-900/50 border-slate-800/80 shadow-xl backdrop-blur-md overflow-hidden h-[500px] flex flex-col justify-between">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-base">Workspace Semantic Projection</CardTitle>
                 <CardDescription className="text-slate-400">Interactive k-means clusters. Click circles to inspect themes.</CardDescription>
               </CardHeader>
               
-              <CardContent className="flex-1 flex items-center justify-center relative bg-slate-950/40 p-0 overflow-hidden">
+              <CardContent className="flex-1 flex items-center justify-center relative bg-slate-950/20 p-0 overflow-hidden">
                 {/* SVG Visual Projection */}
                 <svg className="w-full h-full min-h-[350px]">
                   {/* Drawing connection links if nodes are active */}
@@ -231,15 +231,15 @@ export default function ClustersPage() {
 
                     return (
                       <g key={c.id} className="cluster-node" onClick={() => setActiveClusterId(c.id)}>
-                        {/* Glow filter under active circle */}
+                        {/* Glow circle under active circle */}
                         {isActive && (
                           <circle
                             cx={cx}
                             cy={cy}
-                            r="28"
+                            r="26"
                             fill={c.color}
-                            opacity="0.15"
-                            className="animate-pulse-glow"
+                            opacity="0.25"
+                            className="animate-pulse"
                           />
                         )}
                         <circle
@@ -247,7 +247,7 @@ export default function ClustersPage() {
                           cy={cy}
                           r={isActive ? "20" : "15"}
                           fill={c.color}
-                          stroke="#000"
+                          stroke="#020617"
                           strokeWidth="2"
                           opacity={isActive ? "0.9" : "0.7"}
                           className="transition-all duration-300"
@@ -284,7 +284,7 @@ export default function ClustersPage() {
                           cy={py}
                           r="5"
                           fill={c.color}
-                          stroke="#000"
+                          stroke="#020617"
                           strokeWidth="1"
                           opacity="0.8"
                           className="hover:scale-150 hover:opacity-100 transition-all cursor-pointer duration-200"
@@ -297,10 +297,10 @@ export default function ClustersPage() {
                 </svg>
 
                 {/* Map legends */}
-                <div className="absolute bottom-4 left-4 flex flex-wrap gap-3 p-2 bg-slate-950/60 border border-slate-900/40 rounded-lg backdrop-blur">
+                <div className="absolute bottom-4 left-4 flex flex-wrap gap-3 p-2 bg-slate-950/80 border border-slate-800 rounded-lg backdrop-blur-md shadow-lg">
                   {clusters.map((c, idx) => (
                     <div key={c.id} className="flex items-center gap-1.5 text-[10px]">
-                      <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: c.color }} />
+                      <div className="h-2.5 w-2.5 rounded-full animate-pulse" style={{ backgroundColor: c.color }} />
                       <span className="text-slate-400">Cluster {idx + 1}: {truncate(c.clusterName, 15)}</span>
                     </div>
                   ))}
@@ -312,7 +312,7 @@ export default function ClustersPage() {
           {/* Details Sidebar Column */}
           <div>
             {activeCluster ? (
-              <Card className="bg-slate-950/60 border-slate-900 shadow-xl h-full flex flex-col justify-between">
+              <Card className="bg-slate-900/50 border-slate-800/80 shadow-xl backdrop-blur-md h-full flex flex-col justify-between">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <div className="h-3.5 w-3.5 rounded-full shrink-0" style={{ backgroundColor: activeCluster.color }} />
@@ -322,11 +322,11 @@ export default function ClustersPage() {
                     {activeCluster.description || "Thematic grouping descriptions."}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 overflow-y-auto max-h-[300px]">
+                <CardContent className="flex-1 overflow-y-auto max-h-[300px] pr-1">
                   <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Papers ({activeCluster.papers.length})</h4>
                   <div className="space-y-3">
                     {activeCluster.papers.map((p) => (
-                      <div key={p.id} className="p-3 bg-slate-900/40 border border-slate-800 rounded-lg stagger-item">
+                      <div key={p.id} className="p-3 bg-slate-950/60 border border-slate-800/40 hover:border-slate-700/60 rounded-lg transition-all duration-200 stagger-item">
                         <Link href={`/papers/${p.id}`} className="font-semibold text-white hover:text-indigo-400 hover:underline text-xs block line-clamp-2">
                           {p.title}
                         </Link>
@@ -337,7 +337,7 @@ export default function ClustersPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="h-full flex items-center justify-center border border-slate-900 rounded-2xl text-slate-500 p-8 text-center text-xs">
+              <div className="h-full flex items-center justify-center border border-slate-850 rounded-2xl text-slate-550 p-8 text-center text-xs backdrop-blur-sm">
                 Select a cluster node in the project canvas to view details.
               </div>
             )}

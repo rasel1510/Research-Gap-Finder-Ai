@@ -229,7 +229,7 @@ export default function DashboardPage() {
           <Button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading || !workspaceId}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-2 shadow-lg hover:shadow-indigo-500/25"
+            className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white flex items-center gap-2 shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 hover:scale-[1.02] duration-200 transition-all"
           >
             {isUploading ? (
               <>
@@ -269,7 +269,7 @@ export default function DashboardPage() {
         <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Processing</CardTitle>
-            <Clock className="h-5 w-5 text-amber-400" />
+            <Clock className="h-5 w-5 text-purple-400 animate-pulse" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-white">{processingPapers}</div>
@@ -280,7 +280,7 @@ export default function DashboardPage() {
         <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Thematic Clusters</CardTitle>
-            <Layers className="h-5 w-5 text-violet-400" />
+            <Layers className="h-5 w-5 text-pink-400" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-white">{totalClusters}</div>
@@ -305,7 +305,7 @@ export default function DashboardPage() {
         
         {/* Paper List Column */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-slate-950/60 border-slate-900 shadow-xl">
+          <Card className="bg-slate-900/50 border-slate-800/80 shadow-xl backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-white text-lg">My Literature Repository</CardTitle>
               <CardDescription className="text-slate-400">List of uploaded research papers and parsing status.</CardDescription>
@@ -313,14 +313,14 @@ export default function DashboardPage() {
             <CardContent>
               {papers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 border border-dashed border-slate-800 rounded-xl text-slate-500">
-                  <UploadCloud className="h-10 w-10 text-slate-600 mb-3" />
+                  <UploadCloud className="h-10 w-10 text-slate-600 mb-3 animate-bounce" />
                   <p className="text-sm font-medium">No research papers in this workspace yet.</p>
                   <p className="text-xs text-slate-600 mt-1">Upload a PDF above to get started.</p>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-900/60 max-h-[500px] overflow-y-auto pr-1">
                   {papers.map((paper) => (
-                    <div key={paper.id} className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4 stagger-item">
+                    <div key={paper.id} className="py-3 px-3 hover:bg-slate-900/40 rounded-lg transition-colors flex items-center justify-between gap-4 stagger-item">
                       <div className="min-w-0">
                         {paper.status === "COMPLETED" ? (
                           <Link href={`/papers/${paper.id}`} className="font-semibold text-white hover:text-indigo-400 transition-colors hover:underline text-sm md:text-base block truncate">
@@ -331,7 +331,7 @@ export default function DashboardPage() {
                             {paper.title}
                           </span>
                         )}
-                        <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
+                        <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-550">
                           <span className="truncate max-w-[150px] md:max-w-[250px]">
                             {paper.authors ? `By ${truncate(paper.authors, 40)}` : "Unknown authors"}
                           </span>
@@ -365,7 +365,7 @@ export default function DashboardPage() {
 
         {/* Semantic Search Panel */}
         <div className="space-y-6">
-          <Card className="bg-slate-950/60 border-slate-900 shadow-xl">
+          <Card className="bg-slate-900/50 border-slate-800/80 shadow-xl backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-white text-lg flex items-center gap-2">
                 <Search className="h-5 w-5 text-indigo-400" /> Semantic Literature Search
@@ -382,7 +382,7 @@ export default function DashboardPage() {
                   className="flex-1"
                   required
                 />
-                <Button type="submit" disabled={isSearching} className="bg-indigo-600 hover:bg-indigo-500 text-white">
+                <Button type="submit" disabled={isSearching} className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-650 hover:to-purple-650 text-white shadow-md hover:shadow-indigo-500/10">
                   {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
                 </Button>
               </form>
@@ -391,7 +391,7 @@ export default function DashboardPage() {
               <div className="mt-6 space-y-4 max-h-[300px] overflow-y-auto pr-1">
                 {searchResults.length > 0 ? (
                   searchResults.map((result, idx) => (
-                    <div key={idx} className="p-3 bg-slate-900/40 border border-slate-800 rounded-lg text-xs stagger-item">
+                    <div key={idx} className="p-3 bg-slate-950/60 border border-slate-800/60 rounded-lg text-xs hover:border-slate-700/60 transition-colors duration-200 stagger-item">
                       <div className="flex justify-between items-start gap-2 mb-1.5">
                         <Link href={`/papers/${result.paperId}`} className="font-bold text-white hover:text-indigo-400 hover:underline truncate flex-1">
                           {result.paper?.title}

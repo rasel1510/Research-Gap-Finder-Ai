@@ -11,14 +11,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
             {label}
           </label>
         )}
         <input
           type={type}
           className={cn(
-            "flex h-9 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-sm text-gray-900 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-emerald-500 focus-visible:ring-emerald-500",
+            "flex h-9 w-full rounded-md border border-border bg-slate-900/50 backdrop-blur-sm px-3 py-1 text-sm text-foreground shadow-sm transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-primary focus-visible:ring-primary",
             className
           )}
           ref={ref}
