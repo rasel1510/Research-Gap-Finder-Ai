@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -17,7 +17,8 @@ import {
   Menu,
   X,
   Search,
-  Check
+  Check,
+  Rocket
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -39,6 +40,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null);
+  const [workspacesLoaded, setWorkspacesLoaded] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNewWorkspaceOpen, setIsNewWorkspaceOpen] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
@@ -66,6 +68,13 @@ export default function DashboardLayout({
     }
   }, [workspaces]);
 
+  // Auto-create a default workspace if user has none
+  useEffect(() => {
+    if (workspacesLoaded && workspaces.length === 0 && status === "authenticated") {
+      autoCreateDefaultWorkspace();
+    }
+  }, [workspacesLoaded, workspaces.length, status]);
+
   const fetchWorkspaces = async () => {
     try {
       const res = await fetch("/api/workspaces");
@@ -75,6 +84,32 @@ export default function DashboardLayout({
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setWorkspacesLoaded(true);
+    }
+  };
+
+  const autoCreateDefaultWorkspace = async () => {
+    try {
+      setIsCreatingWorkspace(true);
+      const res = await fetch("/api/workspaces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "My Research",
+          description: "Default research workspace",
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWorkspaces([data]);
+        setActiveWorkspace(data);
+        localStorage.setItem("activeWorkspaceId", data.id);
+      }
+    } catch (err) {
+      console.error("Failed to auto-create workspace:", err);
+    } finally {
+      setIsCreatingWorkspace(false);
     }
   };
 
@@ -123,11 +158,73 @@ export default function DashboardLayout({
     }
   }, [status, router]);
 
-  if (status === "loading" || !activeWorkspace) {
+  // Show loading only while auth is loading or workspaces haven't been fetched yet
+  if (status === "loading" || !workspacesLoaded) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-slate-950">
         <Loader2 className="h-10 w-10 text-indigo-500 animate-spin mb-4" />
         <p className="text-slate-400 font-medium">Initializing workspace context...</p>
+      </div>
+    );
+  }
+
+  // Workspaces loaded but empty and auto-creation in progress
+  if (!activeWorkspace && isCreatingWorkspace) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-slate-950">
+        <Loader2 className="h-10 w-10 text-indigo-500 animate-spin mb-4" />
+        <p className="text-slate-400 font-medium">Setting up your research workspace...</p>
+      </div>
+    );
+  }
+
+  // Workspaces loaded but still empty (auto-creation failed)
+  if (!activeWorkspace) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-slate-950 gap-6">
+        <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4 rounded-2xl shadow-2xl shadow-indigo-500/20">
+          <Rocket className="h-10 w-10 text-white" />
+        </div>
+        <div className="text-center max-w-sm">
+          <h2 className="text-2xl font-bold text-white mb-2">Welcome to ResearchGap AI</h2>
+          <p className="text-slate-400 text-sm">Create your first workspace to start uploading papers and discovering research gaps.</p>
+        </div>
+        <Dialog open={isNewWorkspaceOpen} onOpenChange={setIsNewWorkspaceOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold px-8 py-3 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Workspace
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md bg-slate-950 border border-slate-800">
+            <DialogHeader>
+              <DialogTitle className="text-white">Create Your First Workspace</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateWorkspace} className="space-y-4">
+              <Input
+                label="Workspace Name"
+                type="text"
+                placeholder="E.g., Quantum Computing NLP"
+                value={newWorkspaceName}
+                onChange={(e) => setNewWorkspaceName(e.target.value)}
+                required
+              />
+              <Input
+                label="Description (Optional)"
+                type="text"
+                placeholder="Brief objective of this research workspace"
+                value={newWorkspaceDesc}
+                onChange={(e) => setNewWorkspaceDesc(e.target.value)}
+              />
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsNewWorkspaceOpen(false)}>Cancel</Button>
+                <Button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white" disabled={isCreatingWorkspace}>
+                  {isCreatingWorkspace ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Workspace"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

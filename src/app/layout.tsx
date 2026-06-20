@@ -6,7 +6,7 @@ import { Providers } from "@/components/providers";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "ResearchGap AI — Novel Literature Intelligence Platform",
+  title: "ResearchGap AI",
   description:
     "An AI-native research platform that extracts structured insights, maps citation clusters, and detects methodologies gaps in scientific literature.",
 };

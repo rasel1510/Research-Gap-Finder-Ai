@@ -9,6 +9,18 @@ import { generatePaperEmbeddings } from "@/lib/embeddings";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
+/**
+ * Strip characters that PostgreSQL's UTF-8 encoding rejects.
+ * Null bytes (0x00) are the most common culprit from PDF extraction.
+ */
+function sanitizeForDb(value: string | null | undefined): string | null {
+  if (value == null) return null;
+  return value
+    .replace(/\0/g, "")                         // null bytes
+    .replace(/[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "") // other control chars
+    .trim() || null;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -120,15 +132,16 @@ async function processPaperAsync(paperId: string, buffer: Buffer) {
     const extracted = await extractPaperSections(parsed.text);
 
     // Step 3: Update paper with extracted metadata
+    // sanitizeForDb guards against null bytes (Postgres error 22021)
     await prisma.paper.update({
       where: { id: paperId },
       data: {
-        title: extracted.title || "Untitled Paper",
-        authors: extracted.authors || null,
-        abstract: extracted.abstract || null,
+        title: sanitizeForDb(extracted.title) || "Untitled Paper",
+        authors: sanitizeForDb(extracted.authors),
+        abstract: sanitizeForDb(extracted.abstract),
         year: extracted.year || null,
-        journal: extracted.journal || null,
-        rawText: parsed.text.slice(0, 50000), // Limit stored text
+        journal: sanitizeForDb(extracted.journal),
+        rawText: sanitizeForDb(parsed.text.slice(0, 50000)), // Limit stored text
       },
     });
 
@@ -143,12 +156,13 @@ async function processPaperAsync(paperId: string, buffer: Buffer) {
     ];
 
     for (const section of sectionTypes) {
-      if (section.content && section.content !== "Not explicitly stated") {
+      const safeContent = sanitizeForDb(section.content);
+      if (safeContent && safeContent !== "Not explicitly stated") {
         await prisma.paperSection.create({
           data: {
             paperId,
             sectionType: section.type,
-            content: section.content,
+            content: safeContent,
           },
         });
       }

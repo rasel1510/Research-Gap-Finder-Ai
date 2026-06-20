@@ -12,6 +12,13 @@ export async function GET() {
     }
 
     const userId = (session.user as { id: string }).id;
+
+    // Verify the user actually exists in the database (guards against stale JWTs)
+    const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+    if (!userExists) {
+      return NextResponse.json({ error: "SESSION_INVALID" }, { status: 401 });
+    }
+
     const workspaces = await prisma.workspace.findMany({
       where: { userId },
       include: {
@@ -41,6 +48,13 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = (session.user as { id: string }).id;
+
+    // Verify the user actually exists in the database (guards against stale JWTs)
+    const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+    if (!userExists) {
+      return NextResponse.json({ error: "SESSION_INVALID" }, { status: 401 });
+    }
+
     const { name, description } = await req.json();
 
     if (!name) {
