@@ -116,14 +116,14 @@ export default function ClustersPage() {
   const activeCluster = clusters.find((c) => c.id === activeClusterId);
 
   return (
-    <div className="space-y-8 animate-fade-in pb-16">
+    <div className="space-y-8 pb-16">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-green-100 pb-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-white flex items-center gap-2">
-            <Layers className="h-8 w-8 text-indigo-400" /> Thematic Cluster Map
+          <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-2">
+            <Layers className="h-8 w-8 text-green-600" /> Thematic Cluster Map
           </h1>
-          <p className="text-slate-400 mt-1">
+          <p className="text-gray-500 mt-1">
             Group literature into semantic clusters using k-means mapping of abstract embeddings.
           </p>
         </div>
@@ -146,16 +146,16 @@ export default function ClustersPage() {
           <Button
             onClick={handleRunClustering}
             disabled={isClustering || !workspaceId}
-            className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-650 text-white flex items-center gap-2 mt-5 shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 hover:scale-[1.02] duration-200 transition-all"
+            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white flex items-center gap-2 mt-5 shadow-md shadow-green-200/50 hover:scale-[1.02] duration-200 transition-all"
           >
             {isClustering ? (
               <>
-                <Loader2 className="h-4.5 w-4.5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Clustering...
               </>
             ) : (
               <>
-                <RefreshCw className="h-4.5 w-4.5" />
+                <RefreshCw className="h-4 w-4" />
                 Run Analysis
               </>
             )}
@@ -164,39 +164,39 @@ export default function ClustersPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-500/15 border border-red-500/20 text-red-400 rounded-xl text-sm font-medium">
+        <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium">
           {error}
         </div>
       )}
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-20 text-slate-500">
-          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin mr-3" />
+        <div className="flex items-center justify-center py-20 text-gray-400">
+          <Loader2 className="h-8 w-8 text-green-500 animate-spin mr-3" />
           <span>Analyzing embedding partitions...</span>
         </div>
       ) : clusters.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 border border-dashed border-slate-800 rounded-2xl text-slate-500 animate-pulse">
-          <Layers className="h-12 w-12 text-slate-755 mb-4" />
-          <p className="font-semibold text-white">No clusters generated yet</p>
-          <p className="text-slate-600 text-sm mt-1 max-w-sm text-center">
+        <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-green-100 rounded-2xl text-gray-400">
+          <Layers className="h-12 w-12 text-green-200 mb-4" />
+          <p className="font-semibold text-gray-700">No clusters generated yet</p>
+          <p className="text-gray-400 text-sm mt-1 max-w-sm text-center">
             You need at least 2 papers uploaded with abstract embeddings. Click &apos;Run Analysis&apos; above.
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* SVG Force/Orbit style visual Map */}
+          {/* SVG Cluster Visual */}
           <div className="lg:col-span-2">
-            <Card className="bg-slate-900/50 border-slate-800/80 shadow-xl backdrop-blur-md overflow-hidden h-[500px] flex flex-col justify-between">
+            <Card className="bg-white border border-green-100 shadow-md overflow-hidden h-[500px] flex flex-col justify-between">
               <CardHeader className="pb-2">
-                <CardTitle className="text-white text-base">Workspace Semantic Projection</CardTitle>
-                <CardDescription className="text-slate-400">Interactive k-means clusters. Click circles to inspect themes.</CardDescription>
+                <CardTitle className="text-gray-900 text-base">Workspace Semantic Projection</CardTitle>
+                <CardDescription className="text-gray-500">Interactive k-means clusters. Click circles to inspect themes.</CardDescription>
               </CardHeader>
               
-              <CardContent className="flex-1 flex items-center justify-center relative bg-slate-950/20 p-0 overflow-hidden">
+              <CardContent className="flex-1 flex items-center justify-center relative bg-green-50/30 p-0 overflow-hidden">
                 {/* SVG Visual Projection */}
                 <svg className="w-full h-full min-h-[350px]">
-                  {/* Drawing connection links if nodes are active */}
+                  {/* Drawing connection links */}
                   {clusters.map((c, cIdx) => {
                     const angle = (cIdx / clusters.length) * 2 * Math.PI;
                     const cx = 280 + Math.cos(angle) * 110;
@@ -216,7 +216,7 @@ export default function ClustersPage() {
                           y2={py}
                           stroke={c.color}
                           strokeWidth="0.8"
-                          strokeOpacity="0.25"
+                          strokeOpacity="0.35"
                         />
                       );
                     });
@@ -231,14 +231,14 @@ export default function ClustersPage() {
 
                     return (
                       <g key={c.id} className="cluster-node" onClick={() => setActiveClusterId(c.id)}>
-                        {/* Glow circle under active circle */}
+                        {/* Glow ring for active */}
                         {isActive && (
                           <circle
                             cx={cx}
                             cy={cy}
                             r="26"
                             fill={c.color}
-                            opacity="0.25"
+                            opacity="0.2"
                             className="animate-pulse"
                           />
                         )}
@@ -247,7 +247,7 @@ export default function ClustersPage() {
                           cy={cy}
                           r={isActive ? "20" : "15"}
                           fill={c.color}
-                          stroke="#020617"
+                          stroke="#ffffff"
                           strokeWidth="2"
                           opacity={isActive ? "0.9" : "0.7"}
                           className="transition-all duration-300"
@@ -266,7 +266,7 @@ export default function ClustersPage() {
                     );
                   })}
 
-                  {/* Draw individual paper nodes orbiting their clusters */}
+                  {/* Draw individual paper nodes */}
                   {clusters.map((c, cIdx) => {
                     const angle = (cIdx / clusters.length) * 2 * Math.PI;
                     const cx = 280 + Math.cos(angle) * 110;
@@ -284,7 +284,7 @@ export default function ClustersPage() {
                           cy={py}
                           r="5"
                           fill={c.color}
-                          stroke="#020617"
+                          stroke="#ffffff"
                           strokeWidth="1"
                           opacity="0.8"
                           className="hover:scale-150 hover:opacity-100 transition-all cursor-pointer duration-200"
@@ -297,11 +297,11 @@ export default function ClustersPage() {
                 </svg>
 
                 {/* Map legends */}
-                <div className="absolute bottom-4 left-4 flex flex-wrap gap-3 p-2 bg-slate-950/80 border border-slate-800 rounded-lg backdrop-blur-md shadow-lg">
+                <div className="absolute bottom-4 left-4 flex flex-wrap gap-3 p-2.5 bg-white/90 border border-green-100 rounded-lg backdrop-blur-md shadow-sm">
                   {clusters.map((c, idx) => (
                     <div key={c.id} className="flex items-center gap-1.5 text-[10px]">
-                      <div className="h-2.5 w-2.5 rounded-full animate-pulse" style={{ backgroundColor: c.color }} />
-                      <span className="text-slate-400">Cluster {idx + 1}: {truncate(c.clusterName, 15)}</span>
+                      <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: c.color }} />
+                      <span className="text-gray-500">Cluster {idx + 1}: {truncate(c.clusterName, 15)}</span>
                     </div>
                   ))}
                 </div>
@@ -312,32 +312,32 @@ export default function ClustersPage() {
           {/* Details Sidebar Column */}
           <div>
             {activeCluster ? (
-              <Card className="bg-slate-900/50 border-slate-800/80 shadow-xl backdrop-blur-md h-full flex flex-col justify-between">
+              <Card className="bg-white border border-green-100 shadow-md h-full flex flex-col justify-between">
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <div className="h-3.5 w-3.5 rounded-full shrink-0" style={{ backgroundColor: activeCluster.color }} />
-                    <CardTitle className="text-white text-lg">{activeCluster.clusterName}</CardTitle>
+                    <CardTitle className="text-gray-900 text-lg">{activeCluster.clusterName}</CardTitle>
                   </div>
-                  <CardDescription className="text-slate-400 mt-2">
+                  <CardDescription className="text-gray-500 mt-2">
                     {activeCluster.description || "Thematic grouping descriptions."}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 overflow-y-auto max-h-[300px] pr-1">
-                  <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Papers ({activeCluster.papers.length})</h4>
+                  <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Papers ({activeCluster.papers.length})</h4>
                   <div className="space-y-3">
                     {activeCluster.papers.map((p) => (
-                      <div key={p.id} className="p-3 bg-slate-950/60 border border-slate-800/40 hover:border-slate-700/60 rounded-lg transition-all duration-200 stagger-item">
-                        <Link href={`/papers/${p.id}`} className="font-semibold text-white hover:text-indigo-400 hover:underline text-xs block line-clamp-2">
+                      <div key={p.id} className="p-3 bg-green-50/60 border border-green-100 hover:border-green-300 rounded-lg transition-all duration-200 stagger-item">
+                        <Link href={`/papers/${p.id}`} className="font-semibold text-gray-900 hover:text-green-700 hover:underline text-xs block line-clamp-2">
                           {p.title}
                         </Link>
-                        <p className="text-[10px] text-slate-500 mt-1 truncate">By {p.authors || "Unknown author"}</p>
+                        <p className="text-[10px] text-gray-400 mt-1 truncate">By {p.authors || "Unknown author"}</p>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             ) : (
-              <div className="h-full flex items-center justify-center border border-slate-850 rounded-2xl text-slate-550 p-8 text-center text-xs backdrop-blur-sm">
+              <div className="h-full flex items-center justify-center border-2 border-dashed border-green-100 rounded-2xl text-gray-400 p-8 text-center text-xs">
                 Select a cluster node in the project canvas to view details.
               </div>
             )}
