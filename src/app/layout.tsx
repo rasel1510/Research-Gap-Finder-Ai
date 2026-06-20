@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
-      <body className={`${inter.variable} animated-gradient min-h-screen text-foreground antialiased selection:bg-indigo-500/30 selection:text-indigo-200`}>
+      <body className={`${inter.variable} animated-gradient min-h-screen text-foreground antialiased selection:bg-green-200 selection:text-green-900`}>
         <Providers>
           <div className="mesh-gradient min-h-screen flex flex-col relative overflow-x-hidden">
             {children}
