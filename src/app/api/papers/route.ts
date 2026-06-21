@@ -6,8 +6,7 @@ import prisma from "@/lib/prisma";
 import { parsePDF } from "@/lib/pdf-parser";
 import { extractPaperSections } from "@/lib/openrouter";
 import { generatePaperEmbeddings } from "@/lib/embeddings";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { after } from "next/server";
 
 /**
  * Strip characters that PostgreSQL's UTF-8 encoding rejects.
@@ -80,28 +79,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Save the PDF file
-    const uploadsDir = join(process.cwd(), "uploads");
-    await mkdir(uploadsDir, { recursive: true });
-    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-    const filePath = join(uploadsDir, fileName);
+    // Convert the PDF to a Base64 data URL
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
+    const base64Data = buffer.toString("base64");
+    const pdfUrl = `data:application/pdf;base64,${base64Data}`;
 
     // Create paper record with PENDING status
     const paper = await prisma.paper.create({
       data: {
         workspaceId,
         title: file.name.replace(".pdf", ""),
-        pdfUrl: `/uploads/${fileName}`,
+        pdfUrl,
         status: "PENDING",
       },
     });
 
-    // Start async processing (don't await - respond immediately)
-    processPaperAsync(paper.id, buffer).catch((err) => {
-      console.error(`Async paper processing failed for ${paper.id}:`, err);
+    // Start background processing reliably in serverless environments using Next.js after()
+    after(async () => {
+      try {
+        await processPaperAsync(paper.id, buffer);
+      } catch (err) {
+        console.error(`Async paper processing failed for ${paper.id}:`, err);
+      }
     });
 
     return NextResponse.json(paper, { status: 201 });
