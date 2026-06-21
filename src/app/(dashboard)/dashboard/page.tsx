@@ -147,15 +147,21 @@ export default function DashboardPage() {
       });
 
       if (!res.ok) {
-        const errData = await res.json();
-        setUploadError(errData.error || "Failed to upload file");
+        let errMsg = "Failed to upload file";
+        try {
+          const errData = await res.json();
+          errMsg = errData.error || errMsg;
+        } catch {
+          errMsg = `Server error (${res.status}): Failed to process the upload.`;
+        }
+        setUploadError(errMsg);
       } else {
         const newPaper = await res.json();
         setPapers((prev) => [newPaper, ...prev]);
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     } catch (err) {
-      setUploadError("Upload connection failed. Please try again.");
+      setUploadError("Upload connection failed. Please check your network connection.");
     } finally {
       setIsUploading(false);
     }
